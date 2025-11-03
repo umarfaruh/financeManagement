@@ -1,0 +1,139 @@
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Finance Pro — Управление финансами</title>
+  <meta name="description" content="Finance Pro — бюджет, подписки, платежи" />
+  <link rel="stylesheet" href="styles.css">
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <!-- Firebase (modules used inside firebase.js) -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"></script>
+  <!-- App scripts -->
+  <script defer src="lang.js"></script>
+  <script defer src="firebase.js"></script>
+  <script defer src="subscribe.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="logo" id="logo">FP</div>
+      <div>
+        <div class="brand-title">Finance Pro</div>
+        <div class="brand-sub">Управление личными финансами</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <select id="lang" class="lang-select" aria-label="Выбор языка"></select>
+      <button id="adminToggle" class="btn-ghost">Admin</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-left">
+        <h1 id="headline">Контролируй деньги. Достигай целей.</h1>
+        <p id="subtitle" class="muted">Практические советы по бюджету, инвестициям и сбережениям.</p>
+
+        <div class="hero-actions">
+          <a id="payNow" class="btn-black" href="#" role="button">Оплатить — 2 000 ₸</a>
+          <a id="featuresBtn" class="btn-outline" href="#tools">Калькуляторы</a>
+        </div>
+
+        <div class="features">
+          <div class="feature-card">
+            <h4 data-i18n="feature_budget">Бюджетирование</h4>
+            <p class="muted" data-i18n="feature_budget_text">Планируй доходы и расходы.</p>
+          </div>
+          <div class="feature-card">
+            <h4 data-i18n="feature_invest">Инвестиции</h4>
+            <p class="muted" data-i18n="feature_invest_text">Начни инвестировать просто.</p>
+          </div>
+          <div class="feature-card">
+            <h4 data-i18n="feature_calc">Калькуляторы</h4>
+            <p class="muted" data-i18n="feature_calc_text">Ипотека, накопления и пр.</p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="subscribe-panel" id="subscribe-panel">
+        <h3 data-i18n="subscribe_title">Подпишись на рассылку</h3>
+        <p class="muted" data-i18n="subscribe_sub">Получай материалы и скидки на услуги.</p>
+
+        <form id="subscribeForm" class="form">
+          <label data-i18n="field_name">Имя</label>
+          <input id="name" name="name" required>
+
+          <label data-i18n="field_email">Email</label>
+          <input id="email" name="email" type="email" required>
+
+          <label data-i18n="field_phone">Телефон (опц.)</label>
+          <input id="phone" name="phone" type="tel">
+
+          <button id="subscribeBtn" class="btn-black" type="submit">Подписаться</button>
+          <p id="subStatus" class="muted"></p>
+        </form>
+
+        <div class="admin-actions">
+          <button id="signInBtn" class="btn-outline">Sign in (Google)</button>
+          <button id="signOutBtn" class="btn-outline" style="display:none">Sign out</button>
+          <button id="exportBtn" class="btn-outline">Export CSV</button>
+        </div>
+      </aside>
+    </section>
+
+    <!-- Tools -->
+    <section id="tools" class="tools">
+      <h2 data-i18n="tools_title">Калькуляторы</h2>
+      <div class="calc-grid">
+        <div class="calc card">
+          <h3 data-i18n="mortgage">Ипотечный калькулятор</h3>
+          <label data-i18n="label_amount">Сумма, тг</label>
+          <input id="mortAmount" type="number" value="10000000">
+          <label data-i18n="label_years">Срок (лет)</label>
+          <input id="mortYears" type="number" value="20">
+          <label data-i18n="label_rate">Ставка (%)</label>
+          <input id="mortRate" type="number" value="12">
+          <button class="btn-black" onclick="calcMortgage()">Рассчитать</button>
+          <p id="mortRes" class="muted"></p>
+        </div>
+
+        <div class="calc card">
+          <h3 data-i18n="savings">Калькулятор накоплений</h3>
+          <label data-i18n="label_month">Ежемесячный взнос, тг</label>
+          <input id="saveMonth" type="number" value="20000">
+          <label data-i18n="label_syears">Период (лет)</label>
+          <input id="saveYears" type="number" value="5">
+          <label data-i18n="label_srate">Ожидаемая доходность (%)</label>
+          <input id="saveRate" type="number" value="8">
+          <button class="btn-black" onclick="calcSavings()">Рассчитать</button>
+          <p id="saveRes" class="muted"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="contact card">
+      <h2 data-i18n="contact_title">Контакты</h2>
+      <form id="contactForm" class="form">
+        <label data-i18n="field_name">Имя</label>
+        <input id="c_name" required>
+        <label data-i18n="field_email">Email</label>
+        <input id="c_email" type="email" required>
+        <label data-i18n="field_message">Сообщение</label>
+        <textarea id="c_msg" rows="4" required></textarea>
+        <button class="btn-black" type="submit">Отправить</button>
+        <p id="contactStatus" class="muted"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div>© Finance Pro — <span id="year"></span></div>
+    <div class="muted">Email: info@example.com</div>
+  </footer>
+</body>
+</html>
